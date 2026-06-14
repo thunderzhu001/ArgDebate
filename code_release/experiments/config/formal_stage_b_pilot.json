@@ -1,0 +1,118 @@
+{
+  "name": "formal_stage_b_pilot",
+  "status": "draft",
+  "purpose": "Generate first paper-eligible N=100 cross-model results and N=50 mechanism ablations.",
+  "depends_on": "formal_stage_a_readiness",
+  "models": [
+    "deepseek_v4_flash",
+    "qwen35_flash",
+    "gemini3_flash_preview",
+    "gpt54_mini"
+  ],
+  "datasets": [
+    {
+      "name": "TruthfulQA",
+      "path": "experiments/factual_qa/truthfulqa_subset_n100.csv",
+      "full_path": "experiments/factual_qa/truthfulqa_full.csv",
+      "formal_n": 100,
+      "judge": "llm"
+    },
+    {
+      "name": "StrategyQA",
+      "path": "experiments/strategy_qa/strategyqa_subset.json",
+      "full_path": "experiments/strategy_qa/strategyqa_full.json",
+      "formal_n": 100,
+      "judge": "deterministic_boolean_plus_llm_audit"
+    }
+  ],
+  "baselines": [
+    "MajorityVote",
+    "WeightedVote",
+    "VanillaDebate",
+    "SelfConsistency",
+    "ScalarTranscriptJudge",
+    "ArgDebate"
+  ],
+  "main_ablation_run": {
+    "model_alias": "deepseek_v4_flash",
+    "n_per_dataset": 50,
+    "ablations": [
+      "no_relation_llm",
+      "no_dfquad",
+      "no_quality_attenuation",
+      "no_fallback",
+      "no_reliability"
+    ]
+  },
+  "stage_b_plan": {
+    "main_models": {
+      "truthfulqa": [
+        "deepseek_v4_flash",
+        "qwen35_flash",
+        "gemini3_flash_preview",
+        "gpt54_mini"
+      ],
+      "strategyqa": [
+        "deepseek_v4_flash",
+        "gemini3_flash_preview",
+        "gpt54_mini"
+      ]
+    },
+    "main_skips": [
+      {
+        "dataset": "strategyqa",
+        "model_alias": "qwen35_flash",
+        "reason": "Stage A same-protocol StrategyQA ArgDebate smoke timed out after 420s on 2026-05-14."
+      }
+    ],
+    "extra_baselines": [
+      "self_consistency",
+      "scalar_transcript_judge"
+    ],
+    "ablation_datasets": [
+      "truthfulqa",
+      "strategyqa"
+    ],
+    "include_full_ablation_reference": true,
+    "paper_sections": [
+      "main",
+      "appendix"
+    ],
+    "timeout_mode": "process",
+    "cost_control": "soft_record_only",
+    "execution_policy": "single_job_default_allow_batch_required"
+  },
+  "judge_policy": {
+    "primary_judge_alias": "gpt54_mini",
+    "backup_judge_alias": "deepseek_v4_flash_judge_backup",
+    "store_raw_judge_json": true,
+    "formal_table_silent_fallback": false,
+    "human_audit_target_n": 100
+  },
+  "run_controls": {
+    "num_agents": 3,
+    "max_rounds": 3,
+    "proposal_temperature": 0.7,
+    "argument_temperature": 0.3,
+    "request_timeout_s": 90,
+    "max_retries": 1,
+    "method_timeout_s": 900,
+    "resume_enabled": true
+  },
+  "artifact_requirements": [
+    "frozen_config_json",
+    "per_item_predictions",
+    "per_item_correctness_vectors",
+    "raw_judge_json",
+    "trace_summary",
+    "runtime_profile",
+    "cost_log",
+    "artifact_manifest_with_hashes",
+    "claim_ledger_update"
+  ],
+  "cost_cap": {
+    "stage_budget_usd": 250,
+    "mode": "advisory_soft_record_only",
+    "stop_on_budget_exceeded": false
+  }
+}

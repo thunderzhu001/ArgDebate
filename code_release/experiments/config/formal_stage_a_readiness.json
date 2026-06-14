@@ -1,0 +1,55 @@
+{
+  "name": "formal_stage_a_readiness",
+  "status": "draft",
+  "purpose": "Validate endpoint stability and trace integrity before any paper-eligible experiment.",
+  "models": [
+    "deepseek_v4_flash",
+    "qwen35_flash",
+    "gemini3_flash_preview",
+    "gpt54_mini"
+  ],
+  "datasets": [
+    {
+      "name": "TruthfulQA",
+      "path": "experiments/factual_qa/truthfulqa_subset.csv",
+      "smoke_n": 1,
+      "pilot_n": 3
+    },
+    {
+      "name": "StrategyQA",
+      "path": "experiments/strategy_qa/strategyqa_subset.json",
+      "smoke_n": 1,
+      "pilot_n": 3
+    }
+  ],
+  "baselines": [
+    "ArgDebate"
+  ],
+  "ablations": [],
+  "judge_policy": {
+    "primary_judge_alias": "gpt54_mini",
+    "backup_judge_alias": "deepseek_v4_flash_judge_backup",
+    "store_raw_judge_json": true,
+    "formal_table_silent_fallback": false
+  },
+  "run_controls": {
+    "num_agents": 3,
+    "max_rounds": 1,
+    "request_timeout_s": 45,
+    "max_retries": 1,
+    "method_timeout_s": 420,
+    "api_probe_required": true
+  },
+  "artifact_requirements": [
+    "frozen_config_json",
+    "per_item_predictions",
+    "raw_judge_json",
+    "trace_summary",
+    "runtime_profile",
+    "artifact_manifest_with_hashes"
+  ],
+  "cost_cap": {
+    "stage_budget_usd": 20,
+    "stop_on_budget_exceeded": true
+  }
+}

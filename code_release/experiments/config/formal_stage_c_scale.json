@@ -1,0 +1,77 @@
+{
+  "name": "formal_stage_c_scale",
+  "status": "draft",
+  "purpose": "Scale successful dataset runs to N=300 after Stage B validates stability and cost.",
+  "depends_on": "formal_stage_b_pilot",
+  "models": [
+    "deepseek_v4_flash",
+    "qwen35_flash",
+    "gemini3_flash_preview",
+    "gpt54_mini"
+  ],
+  "datasets": [
+    {
+      "name": "TruthfulQA",
+      "path": "experiments/factual_qa/truthfulqa_full.csv",
+      "formal_n": 300,
+      "judge": "llm"
+    },
+    {
+      "name": "StrategyQA",
+      "path": "experiments/strategy_qa/strategyqa_full.json",
+      "formal_n": 300,
+      "judge": "deterministic_boolean_plus_llm_audit"
+    },
+    {
+      "name": "AppliedCaseSet",
+      "path": "experiments/applied_cases/applied_case_set_v1.json",
+      "formal_n": 60,
+      "judge": "llm_plus_human_audit",
+      "status": "not_yet_created"
+    }
+  ],
+  "baselines": [
+    "MajorityVote",
+    "WeightedVote",
+    "VanillaDebate",
+    "SelfConsistency",
+    "ScalarTranscriptJudge",
+    "ArgDebate"
+  ],
+  "ablations": [
+    "main_ablation_set_only_if_stage_b_supports_scaling"
+  ],
+  "judge_policy": {
+    "primary_judge_alias": "gpt54_mini",
+    "backup_judge_alias": "deepseek_v4_flash_judge_backup",
+    "store_raw_judge_json": true,
+    "formal_table_silent_fallback": false,
+    "human_audit_target_n": 150
+  },
+  "run_controls": {
+    "num_agents": 3,
+    "max_rounds": 3,
+    "proposal_temperature": 0.7,
+    "argument_temperature": 0.3,
+    "request_timeout_s": 90,
+    "max_retries": 1,
+    "method_timeout_s": 900,
+    "resume_enabled": true
+  },
+  "artifact_requirements": [
+    "frozen_config_json",
+    "per_item_predictions",
+    "per_item_correctness_vectors",
+    "raw_judge_json",
+    "trace_summary",
+    "runtime_profile",
+    "cost_log",
+    "artifact_manifest_with_hashes",
+    "statistical_tests",
+    "claim_ledger_update"
+  ],
+  "cost_cap": {
+    "stage_budget_usd": 600,
+    "stop_on_budget_exceeded": true
+  }
+}

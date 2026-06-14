@@ -1,0 +1,45 @@
+{
+  "description": "Template only. Do not put secrets here. Create model_endpoints.local.json with the same shape, then set the referenced environment variables.",
+  "models": [
+    {
+      "alias": "deepseek_v4_flash",
+      "model_id": "deepseek-v4-flash",
+      "api_key_env": "DEEPSEEK_API_KEY",
+      "base_url_env": "DEEPSEEK_BASE_URL",
+      "enabled": true,
+      "role": "generator"
+    },
+    {
+      "alias": "qwen35_flash",
+      "model_id": "qwen3.5-flash",
+      "api_key_env": "QWEN_API_KEY",
+      "base_url_env": "QWEN_BASE_URL",
+      "enabled": true,
+      "role": "generator"
+    },
+    {
+      "alias": "gemini3_flash_preview",
+      "model_id": "gemini-3-flash-preview",
+      "api_key_env": "GEMINI_API_KEY",
+      "base_url_env": "GEMINI_BASE_URL",
+      "enabled": true,
+      "role": "generator"
+    },
+    {
+      "alias": "gpt54_mini",
+      "model_id": "gpt-5.4-mini",
+      "api_key_env": "GPT54_API_KEY",
+      "base_url_env": "GPT54_BASE_URL",
+      "enabled": true,
+      "role": "generator,primary_judge"
+    },
+    {
+      "alias": "deepseek_v4_flash_judge_backup",
+      "model_id": "deepseek-v4-flash",
+      "api_key_env": "DEEPSEEK_API_KEY",
+      "base_url_env": "DEEPSEEK_BASE_URL",
+      "enabled": true,
+      "role": "backup_judge"
+    }
+  ]
+}
