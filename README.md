@@ -80,6 +80,6 @@ For formal multi-method runs, use the configuration templates in `experiments/co
 
 ## Release Notes
 
-- Choose and add a license before publishing as an open-source repository.
+- This repository is released under the MIT License.
 - Keep `.env`, `model_endpoints.local.json`, and experiment results out of git.
 - Manuscript PDFs, reviewer packages, and historical experiment caches are not part of this code release candidate.
