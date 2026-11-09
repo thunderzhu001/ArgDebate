@@ -1,85 +1,87 @@
 # ArgDebate
 
-ArgDebate is a structure-aware selector for multi-agent debate. It preserves support and attack relations from debate records, maps them into a quantitative bipolar argumentation graph, evaluates graph strength when the route warrants it, and records when the final answer comes from graph resolution, consensus, routed skip, or fallback.
+ArgDebate is a relation-preserving, route-aware selection policy for
+multi-agent debate. The reference implementation extracts arguments and
+support and attack relations from debate records, constructs and evaluates a
+quantitative bipolar argumentation graph when the graph path is used, and
+provides non-graph routes and fallback logic.
 
-This directory is a clean public-code release candidate. It contains the core implementation, baseline selectors, formal experiment harness utilities, lightweight tests, and example configuration files. It intentionally excludes private API keys, local endpoint files, cached experiment outputs, checkpoints, manuscript build products, and author-identifying metadata.
+## Interactive research platform
 
-## Repository Layout
+[Open the research planning platform and mechanism demonstrations](https://argdebate-graph.app.workbuddy.host/?sharecode=UZOTEP76TA).
+The landing page provides a multi-agent research planning workspace and an
+ArgDebate argumentation-graph demonstration, among other interactive tools.
+The platform is an external application; the code snapshot and historical
+evaluation records have the distinct roles described below.
 
-- `src/agents/`: LLM agent wrapper.
-- `src/argumentation/`: argument extraction, quality scoring, QBAF construction, and DF-QuAD-style graph evaluation.
-- `src/debate/`: ArgDebate manager, fallback logic, conflict/deadlock utilities, and ablation helpers.
-- `src/baselines/`: MajorityVote, WeightedVote, VanillaDebate, Self-Consistency, and scalar transcript judge baselines.
-- `experiments/`: reusable experiment harness components and TruthfulQA/StrategyQA runners.
-- `experiments/config/model_endpoints.example.json`: endpoint template; copy to a local file before running live model calls.
-- `tests/`: offline unit tests and one optional live-agent smoke test.
+## Code and evidence scope
 
-## Installation
+`code_release/` contains an inspectable reference implementation, comparison
+selectors, experiment drivers, configuration examples, and tests. It is not
+certified as the exact executable used for every historical evaluation cell:
+the cell-specific runtime commit or code hash was not retained. Some routing,
+convergence, and relation-handling behavior in this snapshot differs from the
+paper-facing protocol. See [Implementation conformance](IMPLEMENTATION_CONFORMANCE.md)
+before interpreting or reusing the drivers.
+
+This repository contains code, not the frozen evaluation data or a numerical
+replay package. The tests below exercise the snapshot; passing them does not
+reproduce the reported study results or establish historical run-to-code
+identity.
+
+## Repository layout
+
+- [`code_release/src/argumentation/`](code_release/src/argumentation/): argument
+  extraction, quality scoring, graph construction, and propagation.
+- [`code_release/src/debate/`](code_release/src/debate/): debate management,
+  conflict and deadlock handling, and fallback strategies.
+- [`code_release/src/agents/`](code_release/src/agents/): language-model agent
+  wrapper.
+- [`code_release/src/baselines/`](code_release/src/baselines/): comparison
+  selectors.
+- [`code_release/experiments/`](code_release/experiments/): dataset drivers,
+  experiment utilities, and configuration examples.
+- [`code_release/tests/`](code_release/tests/): offline tests and a separate
+  live-provider smoke script.
+
+## Installation and offline tests
+
+Python 3.11 was used to verify the offline tests. From the repository root:
 
 ```bash
 python3 -m venv .venv
 source .venv/bin/activate
-pip install -r requirements.txt
+python -m pip install -r requirements.txt
+cd code_release
+PYTHONPATH=. python -m pytest -q tests --ignore=tests/test_2agent_resolve.py
 ```
 
-For local testing, install `pytest` if it is not already available:
+The test command does not require credentials or model calls. Dependency
+installation may require network access. `tests/test_2agent_resolve.py` is a
+separate live-provider smoke script and is excluded from this command.
 
-```bash
-pip install pytest
-```
+## Configuration for live use
 
-## Configuration
-
-Copy the example environment file and fill in local values:
+Some experiment drivers require separately supplied datasets. Live-provider
+paths require a compatible model endpoint and credentials, and may make
+billable provider calls. For the single-endpoint client, copy the template
+inside `code_release/` and set local values:
 
 ```bash
 cp .env.example .env
 ```
 
-The simple OpenAI-compatible client reads:
+This template is intended to be copied while the current directory is
+`code_release/`. The multi-endpoint registry template and its scope are
+described in [`code_release/experiments/config/`](code_release/experiments/config/).
+Keep credentials and local endpoint files out of version control.
 
-```bash
-OPENAI_API_KEY=...
-OPENAI_BASE_URL=https://api.openai.com/v1
-OPENAI_MODEL=...
-```
+## Citing the code
 
-For multi-endpoint formal runs, copy:
+Repository: <https://github.com/thunderzhu001/ArgDebate>. For a specific code
+version, cite the GitHub URL of the commit used as well as the repository URL.
 
-```bash
-cp experiments/config/model_endpoints.example.json experiments/config/model_endpoints.local.json
-```
+## License
 
-`model_endpoints.local.json` is ignored by git and should never be committed.
-
-## Offline Checks
-
-Run offline tests that do not require live model calls:
-
-```bash
-PYTHONPATH=. pytest \
-  tests/test_main_baseline_set.py \
-  tests/test_method_execution.py \
-  tests/test_formal_run_spec.py \
-  tests/test_formal_stage_harness.py \
-  tests/test_formal_table_eligibility.py \
-  tests/test_trace_semantics.py
-```
-
-The file `tests/test_2agent_resolve.py` is a live smoke test and requires a configured model endpoint.
-
-## Example Live Run
-
-After setting API credentials, run a small TruthfulQA experiment:
-
-```bash
-PYTHONPATH=. python experiments/factual_qa/run_truthfulqa_exp.py
-```
-
-For formal multi-method runs, use the configuration templates in `experiments/config/` and start with a small subset before launching larger evaluations.
-
-## Release Notes
-
-- This repository is released under the MIT License.
-- Keep `.env`, `model_endpoints.local.json`, and experiment results out of git.
-- Manuscript PDFs, reviewer packages, and historical experiment caches are not part of this code release candidate.
+The code is released under the [MIT License](LICENSE). Third-party libraries,
+datasets, model weights, and provider outputs retain their own terms.
